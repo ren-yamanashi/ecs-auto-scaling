@@ -1,0 +1,8 @@
+.env*
+*.md
+.eslint.concig.mjs
+.gitignore
+docs/
+.vscode/
+.github/
+cdk.json

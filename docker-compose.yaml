@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  # =====================================
+  # api
+  # =====================================
+  node-sample-api:
+    container_name: 'node-sample-api'
+    build:
+      context: .
+    image: node-sample-api-image
+    env_file:
+      - .env
+    ports:
+      - 80:80

@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import type { StackProps } from "aws-cdk-lib";
 import { CfnOutput, Duration, Stack } from "aws-cdk-lib";
+import { Schedule } from "aws-cdk-lib/aws-applicationautoscaling";
 import type { Construct } from "constructs";
 import { Vpc } from "aws-cdk-lib/aws-ec2";
 import { ContainerImage, CpuArchitecture, FargateTaskDefinition, OperatingSystemFamily } from "aws-cdk-lib/aws-ecs";
@@ -48,19 +49,20 @@ export class ServerStack extends Stack {
       targetUtilizationPercent: 50,
       scaleInCooldown: Duration.seconds(60),
       scaleOutCooldown: Duration.seconds(60),
+
     });
 
-    // // NOTE: 8時にスケールアウト
-    // scaling.scaleOnSchedule("ScaleOutSchedule", {
-    //   schedule: applicationAutoscaling.Schedule.cron({ hour: "8", minute: "0" }), // 午前8時
-    //   minCapacity: 5,
-    // });
+    // NOTE: 8時にスケールアウト
+    scaling.scaleOnSchedule("ScaleOutSchedule", {
+      schedule: Schedule.cron({ hour: "8", minute: "0" }), // 午前8時
+      minCapacity: 5,
+    });
 
-    // // NOTE: 18時にスケールイン
-    // scaling.scaleOnSchedule("ScaleInSchedule", {
-    //   schedule: applicationAutoscaling.Schedule.cron({ hour: "18", minute: "0" }), // 午後6時
-    //   minCapacity: 1,
-    // });
+    // NOTE: 18時にスケールイン
+    scaling.scaleOnSchedule("ScaleInSchedule", {
+      schedule: Schedule.cron({ hour: "18", minute: "0" }), // 午後6時
+      minCapacity: 1,
+    });
 
     // NOTE: 出力としてロードバランサーのDNS名を出力
     new CfnOutput(this, "LoadBalancerDNS", {

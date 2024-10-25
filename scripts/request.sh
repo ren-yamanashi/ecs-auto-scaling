@@ -1,1 +1,1 @@
-ab -n 500 -c 100 http://$LoadBalancerDNS/
+ab -n 1000 -c 100 http://$LoadBalancerDNS/

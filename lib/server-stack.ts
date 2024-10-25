@@ -1,11 +1,12 @@
 import * as path from "node:path";
 import type { StackProps } from "aws-cdk-lib";
-import { CfnOutput, Duration, Stack } from "aws-cdk-lib";
+import { CfnOutput, Duration, Stack, TimeZone } from "aws-cdk-lib";
 import { Schedule } from "aws-cdk-lib/aws-applicationautoscaling";
 import type { Construct } from "constructs";
 import { Vpc } from "aws-cdk-lib/aws-ec2";
 import { ContainerImage, CpuArchitecture, FargateTaskDefinition, OperatingSystemFamily } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
+import { MetricAggregationType } from "aws-cdk-lib/aws-autoscaling";
 
 export class ServerStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -42,24 +43,32 @@ export class ServerStack extends Stack {
     // NOTE: オートスケーリングのターゲット設定
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
-      maxCapacity: 10,
+      maxCapacity: 5,
     });
-    // NOTE: CPU使用率が50%を超えたらスケールアウト
-    scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 50,
-      scaleInCooldown: Duration.seconds(60),
-      scaleOutCooldown: Duration.seconds(60),
 
+    // NOTE: CPU使用率に応じてスケールアウト・スケールイン
+    scaling.scaleOnMetric("StepScaling", {
+      metric: fargateService.service.metricCpuUtilization({
+        period: Duration.minutes(1), // 1分間隔でCPU使用率を取得
+      }),
+      scalingSteps: [
+        { lower: 30, change: +1 }, // CPUの使用率が30%以上の場合にタスクを1つ増加
+        { upper: 20, change: -1 }, // CPUの使用率が20%以下の場合にタスクを1つ減少
+      ],
+      metricAggregationType: MetricAggregationType.AVERAGE, // 平均値に基づいてスケーリングされるように設定
+      cooldown: Duration.minutes(1), // スケーリングのクールダウン期間を3分に設定
     });
 
     // NOTE: 8時にスケールアウト
     scaling.scaleOnSchedule("ScaleOutSchedule", {
+      timeZone: TimeZone.ASIA_TOKYO,
       schedule: Schedule.cron({ hour: "8", minute: "0" }), // 午前8時
-      minCapacity: 5,
+      minCapacity: 3,
     });
 
     // NOTE: 18時にスケールイン
     scaling.scaleOnSchedule("ScaleInSchedule", {
+      timeZone: TimeZone.ASIA_TOKYO,
       schedule: Schedule.cron({ hour: "18", minute: "0" }), // 午後6時
       minCapacity: 1,
     });

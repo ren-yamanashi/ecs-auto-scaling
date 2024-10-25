@@ -1,1 +1,1 @@
-seq 1 10000 | xargs -n1 -P1000 curl -s http://$LoadBalancerDNS/ -w "\n"
+ab -n 500 -c 100 http://$LoadBalancerDNS/

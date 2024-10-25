@@ -62,14 +62,14 @@ export class ServerStack extends Stack {
     // NOTE: 8時にスケールアウト
     scaling.scaleOnSchedule("ScaleOutSchedule", {
       timeZone: TimeZone.ASIA_TOKYO,
-      schedule: Schedule.cron({ hour: "8", minute: "0" }), // 午前8時
+      schedule: Schedule.cron({ hour: "8", minute: "0" }),
       minCapacity: 3,
     });
 
     // NOTE: 18時にスケールイン
     scaling.scaleOnSchedule("ScaleInSchedule", {
       timeZone: TimeZone.ASIA_TOKYO,
-      schedule: Schedule.cron({ hour: "18", minute: "0" }), // 午後6時
+      schedule: Schedule.cron({ hour: "18", minute: "0" }),
       minCapacity: 1,
     });
 

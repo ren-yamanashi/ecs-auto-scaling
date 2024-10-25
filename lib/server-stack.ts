@@ -56,7 +56,7 @@ export class ServerStack extends Stack {
         { upper: 20, change: -1 }, // CPUの使用率が20%以下の場合にタスクを1つ減少
       ],
       metricAggregationType: MetricAggregationType.AVERAGE, // 平均値に基づいてスケーリングされるように設定
-      cooldown: Duration.minutes(1), // スケーリングのクールダウン期間を3分に設定
+      cooldown: Duration.minutes(1), // スケーリングのクールダウン期間を1分に設定
     });
 
     // NOTE: 8時にスケールアウト
